@@ -3,7 +3,10 @@ package;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.addons.editors.ogmo.FlxOgmo3Loader;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.tile.FlxTilemap;
+import flixel.util.FlxColor;
 
 class PlayState extends FlxState
 {
@@ -16,35 +19,49 @@ class PlayState extends FlxState
 	var darkObj:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
 	var lightObj:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
 
+	var map:FlxOgmo3Loader;
+	var walls:FlxTilemap;
+
 	override public function create()
 	{
 		super.create();
-		plWHITE = new Player(0, 0, 'WHITE');
-		plBLACK = new Player(0, 0, 'BLACK');
+
+		map = new FlxOgmo3Loader(AssetPaths.main__ogmo, 'assets/data/$level.json'); // loading the level
+		walls = map.loadTilemap(AssetPaths.tileset__png, 'walls');
+
+		plWHITE = new Player(0, 0, 'WHITE'); // setting up the player(s)
+		plBLACK = new Player(0, 0, 'BLACK'); // WHITE/BLACK refers to outline!
 		add(plWHITE);
+		add(plBLACK);
+		plWHITE.visible = true;
+		plBLACK.visible = false;
 	}
 
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		if (FlxG.keys.justPressed.TAB)
+		if (FlxG.keys.justPressed.TAB) // do i have to say anything? -.-
 			switchPallet();
 	}
 
-	function switchPallet()
+	function switchPallet() // ? <-- this is a question mark.
 	{
 		blackPallet = !blackPallet;
-		if (blackPallet)
+		if (blackPallet) // if bg is switched to black
 		{
+			bgColor = FlxColor.BLACK;
+			remove(lightObj);
 			add(darkObj);
 			plWHITE.visible = true;
 			plBLACK.visible = false;
 		}
-		if (!blackPallet)
+		if (!blackPallet) // if bg is switched to white
 		{
+			bgColor = FlxColor.WHITE;
+			remove(darkObj);
 			add(lightObj);
-			plWHITE.visible = true;
-			plBLACK.visible = false;
+			plWHITE.visible = false;
+			plBLACK.visible = true;
 		}
 	}
 }
