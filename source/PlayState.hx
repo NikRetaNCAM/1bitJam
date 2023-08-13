@@ -1,6 +1,7 @@
 package;
 
 import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.editors.ogmo.FlxOgmo3Loader;
@@ -18,15 +19,15 @@ class PlayState extends FlxState
 	var plBLACK:Player;
 	var blackPallet:Bool = true; // aka if BG is black
 
-	var darkObj:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
-	var lightObj:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
-
 	var isDial:Bool = false;
 	var dialLine:Int = 0;
 	var dialText:FlxTypeText;
 
 	var map:FlxOgmo3Loader;
 	var walls:FlxTilemap;
+
+	var whiteBlocks:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
+	var blackBlocks:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
 
 	override public function create()
 	{
@@ -62,6 +63,7 @@ class PlayState extends FlxState
 	{
 		super.update(elapsed);
 		FlxG.collide(players, walls);
+
 		if (FlxG.keys.justPressed.TAB) // do i have to say anything? -.-
 			switchPallet();
 
@@ -70,6 +72,11 @@ class PlayState extends FlxState
 			dialLine++;
 			doDial();
 		}
+
+		if (blackPallet)
+			FlxG.collide(whiteBlocks, players);
+		if (!blackPallet)
+			FlxG.collide(blackBlocks, players);
 	}
 
 	function needDialogue():Bool
@@ -124,6 +131,21 @@ class PlayState extends FlxState
 				plWHITE.visible = true;
 				plBLACK.visible = false;
 				add(players);
+				add(whiteBlocks);
+				remove(blackBlocks);
+			case 'block':
+				var newBlock:FlxSprite = new FlxSprite(entity.x, entity.y);
+				newBlock.immovable = true;
+				if (entity.values.color == 'black')
+				{
+					newBlock.makeGraphic(32, 32, FlxColor.BLACK);
+					blackBlocks.add(newBlock);
+				}
+				else if (entity.values.color == 'white')
+				{
+					newBlock.makeGraphic(32, 32, FlxColor.WHITE);
+					whiteBlocks.add(newBlock);
+				}
 		}
 	}
 
@@ -135,8 +157,10 @@ class PlayState extends FlxState
 			dialText.color = FlxColor.WHITE;
 			bgColor = FlxColor.BLACK;
 			// add(walls);
-			remove(lightObj);
-			add(darkObj);
+			/*remove(lightObj);
+				add(darkObj); */
+			add(whiteBlocks);
+			remove(blackBlocks);
 			plWHITE.visible = true;
 			plBLACK.visible = false;
 		}
@@ -145,8 +169,10 @@ class PlayState extends FlxState
 			dialText.color = FlxColor.BLACK;
 			bgColor = FlxColor.WHITE;
 			// remove(walls);
-			remove(darkObj);
-			add(lightObj);
+			/*remove(darkObj);
+				add(lightObj); */
+			add(blackBlocks);
+			remove(whiteBlocks);
 			plWHITE.visible = false;
 			plBLACK.visible = true;
 		}
@@ -169,6 +195,9 @@ class Player extends FlxSprite
 		setFacingFlip(RIGHT, false, false);
 		setFacingFlip(LEFT, true, false);
 		drag.x = drag.y = speed * 4;
+
+		setSize(24, 24);
+		offset.set(4, 4);
 	}
 
 	override public function update(elapsed:Float)
