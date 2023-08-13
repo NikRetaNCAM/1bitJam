@@ -12,6 +12,7 @@ class PlayState extends FlxState
 {
 	var level:Int = 0;
 
+	var players:FlxTypedGroup<Player> = new FlxTypedGroup();
 	var plWHITE:Player;
 	var plBLACK:Player;
 	var blackPallet:Bool = true; // aka if BG is black
@@ -26,22 +27,50 @@ class PlayState extends FlxState
 	{
 		super.create();
 
-		map = new FlxOgmo3Loader(AssetPaths.main__ogmo, 'assets/data/$level.json'); // loading the level
+		map = new FlxOgmo3Loader(AssetPaths.main__ogmo, 'assets/data/lvl_$level.json'); // loading the level
 		walls = map.loadTilemap(AssetPaths.tileset__png, 'walls');
+		add(walls);
 
-		plWHITE = new Player(0, 0, 'WHITE'); // setting up the player(s)
-		plBLACK = new Player(0, 0, 'BLACK'); // WHITE/BLACK refers to outline!
-		add(plWHITE);
-		add(plBLACK);
-		plWHITE.visible = true;
-		plBLACK.visible = false;
+		map.loadEntities(entitiesLoad, 'entities'); // >:(
+
+		walls.setTileProperties(0, NONE); // holy shit 0.0
+		walls.setTileProperties(1, ANY);
+		walls.setTileProperties(2, ANY);
+		walls.setTileProperties(3, ANY);
+		walls.setTileProperties(4, NONE);
+		walls.setTileProperties(5, ANY);
+		walls.setTileProperties(6, ANY);
+		walls.setTileProperties(7, ANY);
+		walls.setTileProperties(8, NONE);
+		walls.setTileProperties(9, ANY);
+		walls.setTileProperties(10, ANY);
+		walls.setTileProperties(11, ANY);
+		walls.follow();
+
+		FlxG.camera.follow(plWHITE);
 	}
 
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
+		FlxG.collide(players, walls);
 		if (FlxG.keys.justPressed.TAB) // do i have to say anything? -.-
 			switchPallet();
+	}
+
+	function entitiesLoad(entity:EntityData)
+	{
+		switch (entity.name)
+		{
+			case 'player':
+				plWHITE = new Player(entity.x, entity.y, 'WHITE'); // setting up the player(s)
+				plBLACK = new Player(entity.x, entity.y, 'BLACK'); // WHITE/BLACK refers to outline!
+				players.add(plWHITE);
+				players.add(plBLACK);
+				plWHITE.visible = true;
+				plBLACK.visible = false;
+				add(players);
+		}
 	}
 
 	function switchPallet() // ? <-- this is a question mark.
@@ -50,6 +79,7 @@ class PlayState extends FlxState
 		if (blackPallet) // if bg is switched to black
 		{
 			bgColor = FlxColor.BLACK;
+			// add(walls);
 			remove(lightObj);
 			add(darkObj);
 			plWHITE.visible = true;
@@ -58,6 +88,7 @@ class PlayState extends FlxState
 		if (!blackPallet) // if bg is switched to white
 		{
 			bgColor = FlxColor.WHITE;
+			// remove(walls);
 			remove(darkObj);
 			add(lightObj);
 			plWHITE.visible = false;
