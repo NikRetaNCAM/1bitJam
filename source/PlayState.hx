@@ -4,6 +4,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.editors.ogmo.FlxOgmo3Loader;
+import flixel.addons.text.FlxTypeText;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxColor;
@@ -19,6 +20,10 @@ class PlayState extends FlxState
 
 	var darkObj:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
 	var lightObj:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
+
+	var isDial:Bool = false;
+	var dialLine:Int = 0;
+	var dialText:FlxTypeText;
 
 	var map:FlxOgmo3Loader;
 	var walls:FlxTilemap;
@@ -48,6 +53,9 @@ class PlayState extends FlxState
 		walls.follow();
 
 		FlxG.camera.follow(plWHITE);
+
+		if (needDialogue())
+			doDial();
 	}
 
 	override public function update(elapsed:Float)
@@ -56,6 +64,52 @@ class PlayState extends FlxState
 		FlxG.collide(players, walls);
 		if (FlxG.keys.justPressed.TAB) // do i have to say anything? -.-
 			switchPallet();
+
+		if (isDial && FlxG.keys.justPressed.ENTER)
+		{
+			dialLine++;
+			doDial();
+		}
+	}
+
+	function needDialogue():Bool
+	{
+		var retValue:Bool = false;
+
+		switch (level)
+		{
+			case 0:
+				retValue = true;
+		}
+
+		return retValue;
+	}
+
+	function doDial()
+	{
+		isDial = true;
+		var dial:Array<String> = [''];
+		switch (level) // THE part
+		{
+			case 0:
+				dial = [
+					'hi\n-enter-',
+					'move around\n-arrow keys-',
+					'use the lightswitch\n-tab-',
+					'you should solve the puzzle,\n-N O W-'
+				];
+		}
+		remove(dialText);
+
+		if (dialLine >= dial.length) // should work :/
+			return;
+
+		dialText = new FlxTypeText(0, 0, 600, dial[dialLine], 16);
+		dialText.screenCenter();
+		dialText.alignment = CENTER;
+		dialText.scrollFactor.set(0, 0);
+		add(dialText);
+		dialText.start(0.125);
 	}
 
 	function entitiesLoad(entity:EntityData)
@@ -78,6 +132,7 @@ class PlayState extends FlxState
 		blackPallet = !blackPallet;
 		if (blackPallet) // if bg is switched to black
 		{
+			dialText.color = FlxColor.WHITE;
 			bgColor = FlxColor.BLACK;
 			// add(walls);
 			remove(lightObj);
@@ -87,6 +142,7 @@ class PlayState extends FlxState
 		}
 		if (!blackPallet) // if bg is switched to white
 		{
+			dialText.color = FlxColor.BLACK;
 			bgColor = FlxColor.WHITE;
 			// remove(walls);
 			remove(darkObj);
