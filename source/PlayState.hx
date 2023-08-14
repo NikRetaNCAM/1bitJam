@@ -98,6 +98,18 @@ class PlayState extends FlxState
 							}
 					}
 				}
+				/*else if (!i.overlaps(boxes) && i.isPressed || !i.overlaps(players) && i.isPressed)
+					{
+						i.isPressed = false;
+						switch (i.connect)
+						{
+							case 'powblock':
+								for (j in powblocks)
+								{
+									j.visible = true;
+								}
+						}
+				}*/
 			}
 		}
 		if (!blackPallet) // WHITE BG
@@ -106,6 +118,17 @@ class PlayState extends FlxState
 			FlxG.collide(boxes, players);
 			FlxG.collide(boxes, walls);
 		}
+
+		FlxG.overlap(powblocks, players, function sep(powbl, pl) // this checks if powblock is visible and if so, activates collision
+		{
+			FlxObject.separate(powbl, pl);
+		}, function check(pow, pl)
+		{
+			if (pow.visible)
+				return true;
+			else
+				return false;
+		});
 	}
 
 	function needDialogue():Bool
@@ -199,6 +222,7 @@ class PlayState extends FlxState
 				powBlock.animation.add('white', [0]);
 				powBlock.animation.add('black', [1]);
 				powBlock.animation.play('white');
+				powBlock.immovable = true;
 				powblocks.add(powBlock);
 		}
 	}
