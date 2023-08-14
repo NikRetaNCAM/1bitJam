@@ -80,43 +80,46 @@ class PlayState extends FlxState
 		if (blackPallet) // BLACK BG
 		{
 			FlxG.collide(whiteBlocks, players);
-
-			for (i in buttons) // bad way of checking this!!
-			{
-				if (i.overlaps(boxes) && !i.isPressed || i.overlaps(players) && !i.isPressed) // ??????
-				{
-					i.isPressed = true;
-					switch (i.connect) // check target type
-					{
-						case 'powblock':
-							for (j in powblocks)
-							{
-								if (j.x == i.tar_x && j.y == i.tar_y) // check target pos
-								{
-									j.visible = false;
-								}
-							}
-					}
-				}
-				/*else if (!i.overlaps(boxes) && i.isPressed || !i.overlaps(players) && i.isPressed)
-					{
-						i.isPressed = false;
-						switch (i.connect)
-						{
-							case 'powblock':
-								for (j in powblocks)
-								{
-									j.visible = true;
-								}
-						}
-				}*/
-			}
 		}
 		if (!blackPallet) // WHITE BG
 		{
 			FlxG.collide(blackBlocks, players);
 			FlxG.collide(boxes, players);
 			FlxG.collide(boxes, walls);
+		}
+
+		for (i in buttons) // bad way of checking this!!
+		{
+			if (i.overlaps(boxes) && !i.isPressed || i.overlaps(players) && !i.isPressed) // ??????
+			{
+				i.isPressed = true;
+				switch (i.connect) // check target type
+				{
+					case 'powblock':
+						for (j in powblocks)
+						{
+							if (j.x == i.tar_x && j.y == i.tar_y) // check target pos
+							{
+								j.visible = false;
+							}
+						}
+				}
+			}
+			else // if (!i.overlaps(boxes) && i.isPressed || !i.overlaps(players) && i.isPressed)
+			{
+				i.isPressed = false;
+				switch (i.connect)
+				{
+					case 'powblock':
+						for (j in powblocks)
+						{
+							if (j.x == i.tar_x && j.y == i.tar_y) // check target pos
+							{
+								j.visible = false;
+							}
+						}
+				}
+			}
 		}
 
 		FlxG.overlap(powblocks, players, function sep(powbl, pl) // this checks if powblock is visible and if so, activates collision
