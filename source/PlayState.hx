@@ -79,14 +79,27 @@ class PlayState extends FlxState
 
 		if (blackPallet) // BLACK BG
 		{
+			if (plBLACK.x != plWHITE.x || plBLACK.y != plWHITE.y)
+			{
+				// plBLACK.setPosition(plWHITE.x, plWHITE.y);
+				plWHITE.setPosition(plBLACK.x, plBLACK.y);
+			}
+
 			FlxG.collide(whiteBlocks, players);
 		}
 		if (!blackPallet) // WHITE BG
 		{
+			if (plBLACK.x != plWHITE.x || plBLACK.y != plWHITE.y)
+			{
+				// plWHITE.setPosition(plBLACK.x, plBLACK.y);
+				plBLACK.setPosition(plWHITE.x, plWHITE.y);
+			}
+
 			FlxG.collide(blackBlocks, players);
-			FlxG.collide(boxes, players);
-			FlxG.collide(boxes, walls);
 		}
+
+		FlxG.collide(boxes, players);
+		FlxG.collide(boxes, walls);
 
 		for (i in buttons) // bad way of checking this!!
 		{
@@ -105,7 +118,7 @@ class PlayState extends FlxState
 						}
 				}
 			}
-			else // if (!i.overlaps(boxes) && i.isPressed || !i.overlaps(players) && i.isPressed)
+			if (!i.overlaps(boxes) && !i.overlaps(players) && i.isPressed)
 			{
 				i.isPressed = false;
 				switch (i.connect)
@@ -115,7 +128,7 @@ class PlayState extends FlxState
 						{
 							if (j.x == i.tar_x && j.y == i.tar_y) // check target pos
 							{
-								j.visible = false;
+								j.visible = true;
 							}
 						}
 				}
@@ -216,8 +229,8 @@ class PlayState extends FlxState
 			case 'boxSpawn':
 				var newBox = new FlxSprite(entity.x, entity.y);
 				newBox.loadGraphic('assets/images/box.png');
-				newBox.drag.x = 280;
-				newBox.drag.y = 280;
+				newBox.drag.x = 240;
+				newBox.drag.y = 240;
 				boxes.add(newBox);
 			case 'powBlock':
 				var powBlock = new FlxSprite(entity.x, entity.y);
@@ -242,6 +255,10 @@ class PlayState extends FlxState
 				add(darkObj); */
 			add(whiteBlocks);
 			remove(blackBlocks);
+			for (i in powblocks)
+				i.animation.play('white');
+
+			walls.color = FlxColor.WHITE;
 
 			buttons.visible = true;
 			boxes.visible = false;
@@ -258,6 +275,10 @@ class PlayState extends FlxState
 				add(lightObj); */
 			add(blackBlocks);
 			remove(whiteBlocks);
+			for (i in powblocks)
+				i.animation.play('black');
+
+			walls.color = FlxColor.BLACK;
 
 			buttons.visible = false;
 			boxes.visible = true;
