@@ -29,6 +29,10 @@ class PlayState extends FlxState
 	var whiteBlocks:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
 	var blackBlocks:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
 
+	var buttons:FlxTypedGroup<Button> = new FlxTypedGroup();
+	var boxes:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
+	var powblocks:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
+
 	override public function create()
 	{
 		super.create();
@@ -73,10 +77,35 @@ class PlayState extends FlxState
 			doDial();
 		}
 
-		if (blackPallet)
+		if (blackPallet) // BLACK BG
+		{
 			FlxG.collide(whiteBlocks, players);
-		if (!blackPallet)
+
+			for (i in buttons) // bad way of checking this!!
+			{
+				if (i.overlaps(boxes) && !i.isPressed || i.overlaps(players) && !i.isPressed) // ??????
+				{
+					i.isPressed = true;
+					switch (i.connect) // check target type
+					{
+						case 'powblock':
+							for (j in powblocks)
+							{
+								if (j.x == i.tar_x && j.y == i.tar_y) // check target pos
+								{
+									j.visible = false;
+								}
+							}
+					}
+				}
+			}
+		}
+		if (!blackPallet) // WHITE BG
+		{
 			FlxG.collide(blackBlocks, players);
+			FlxG.collide(boxes, players);
+			FlxG.collide(boxes, walls);
+		}
 	}
 
 	function needDialogue():Bool
@@ -113,6 +142,7 @@ class PlayState extends FlxState
 
 		dialText = new FlxTypeText(0, 0, 600, dial[dialLine], 16);
 		dialText.screenCenter();
+		dialText.y -= 75;
 		dialText.alignment = CENTER;
 		dialText.scrollFactor.set(0, 0);
 		add(dialText);
@@ -130,9 +160,16 @@ class PlayState extends FlxState
 				players.add(plBLACK);
 				plWHITE.visible = true;
 				plBLACK.visible = false;
-				add(players);
+
 				add(whiteBlocks);
 				remove(blackBlocks);
+				add(buttons);
+				add(boxes);
+				add(powblocks);
+				buttons.visible = true;
+				boxes.visible = false;
+
+				add(players);
 			case 'block':
 				var newBlock:FlxSprite = new FlxSprite(entity.x, entity.y);
 				newBlock.immovable = true;
@@ -146,6 +183,23 @@ class PlayState extends FlxState
 					newBlock.makeGraphic(32, 32, FlxColor.WHITE);
 					whiteBlocks.add(newBlock);
 				}
+			case 'button':
+				var newButt = new Button(entity.x, entity.y, entity.values.connect, entity.values.tar_x, entity.values.tar_y);
+				newButt.loadGraphic('assets/images/button.png');
+				buttons.add(newButt);
+			case 'boxSpawn':
+				var newBox = new FlxSprite(entity.x, entity.y);
+				newBox.loadGraphic('assets/images/box.png');
+				newBox.drag.x = 280;
+				newBox.drag.y = 280;
+				boxes.add(newBox);
+			case 'powBlock':
+				var powBlock = new FlxSprite(entity.x, entity.y);
+				powBlock.loadGraphic('assets/images/powblock.png', true, 32, 32);
+				powBlock.animation.add('white', [0]);
+				powBlock.animation.add('black', [1]);
+				powBlock.animation.play('white');
+				powblocks.add(powBlock);
 		}
 	}
 
@@ -161,6 +215,10 @@ class PlayState extends FlxState
 				add(darkObj); */
 			add(whiteBlocks);
 			remove(blackBlocks);
+
+			buttons.visible = true;
+			boxes.visible = false;
+
 			plWHITE.visible = true;
 			plBLACK.visible = false;
 		}
@@ -173,9 +231,30 @@ class PlayState extends FlxState
 				add(lightObj); */
 			add(blackBlocks);
 			remove(whiteBlocks);
+
+			buttons.visible = false;
+			boxes.visible = true;
+
 			plWHITE.visible = false;
 			plBLACK.visible = true;
 		}
+	}
+}
+
+class Button extends FlxSprite
+{
+	public var connect:String = 'powblock';
+	public var tar_x:Float = 0;
+	public var tar_y:Float = 0;
+
+	public var isPressed:Bool = false;
+
+	public function new(x:Float, y:Float, pconnect:String, ptx:Float, pty:Float)
+	{
+		super(x, y);
+		connect = pconnect;
+		tar_x = ptx;
+		tar_y = pty;
 	}
 }
 
