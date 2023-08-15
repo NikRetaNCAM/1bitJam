@@ -9,10 +9,11 @@ import flixel.addons.text.FlxTypeText;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxColor;
+import openfl.Assets;
 
 class PlayState extends FlxState
 {
-	var level:Int = 0;
+	public static var level:Int = 0;
 
 	var players:FlxTypedGroup<Player> = new FlxTypedGroup();
 	var plWHITE:Player;
@@ -26,6 +27,8 @@ class PlayState extends FlxState
 	var map:FlxOgmo3Loader;
 	var walls:FlxTilemap;
 
+	var finish:FlxSprite;
+
 	var whiteBlocks:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
 	var blackBlocks:FlxTypedGroup<FlxSprite> = new FlxTypedGroup();
 
@@ -37,11 +40,15 @@ class PlayState extends FlxState
 	{
 		super.create();
 
+		if (!Assets.exists('assets/data/lvl_$level.json'))
+			PlayState.level = 0;
+
 		map = new FlxOgmo3Loader(AssetPaths.main__ogmo, 'assets/data/lvl_$level.json'); // loading the level
 		walls = map.loadTilemap(AssetPaths.tileset__png, 'walls');
 		add(walls);
 
 		map.loadEntities(entitiesLoad, 'entities'); // >:(
+		add(players);
 
 		walls.setTileProperties(0, NONE); // holy shit 0.0
 		walls.setTileProperties(1, ANY);
@@ -61,6 +68,8 @@ class PlayState extends FlxState
 
 		if (needDialogue())
 			doDial();
+
+		FlxG.camera.fade(FlxColor.BLACK, 0.5, true);
 	}
 
 	override public function update(elapsed:Float)
@@ -145,6 +154,17 @@ class PlayState extends FlxState
 			else
 				return false;
 		});
+
+		FlxG.overlap(players, finish, function proceed(pl:Player, finish:FlxSprite) // finish the level
+		{
+			finish.destroy();
+
+			PlayState.level++;
+			FlxG.camera.fade(FlxColor.BLACK, 0.5, false, function blah()
+			{
+				FlxG.switchState(new PlayState());
+			});
+		});
 	}
 
 	function needDialogue():Bool
@@ -207,8 +227,6 @@ class PlayState extends FlxState
 				add(powblocks);
 				buttons.visible = true;
 				boxes.visible = false;
-
-				add(players);
 			case 'block':
 				var newBlock:FlxSprite = new FlxSprite(entity.x, entity.y);
 				newBlock.immovable = true;
@@ -240,6 +258,10 @@ class PlayState extends FlxState
 				powBlock.animation.play('white');
 				powBlock.immovable = true;
 				powblocks.add(powBlock);
+			case 'finish':
+				finish = new FlxSprite(entity.x, entity.y);
+				finish.loadGraphic('assets/images/finish.png');
+				add(finish);
 		}
 	}
 
