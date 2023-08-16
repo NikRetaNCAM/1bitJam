@@ -4,6 +4,7 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.FlxSubState;
 import flixel.addons.editors.ogmo.FlxOgmo3Loader;
 import flixel.addons.text.FlxTypeText;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -22,7 +23,7 @@ class PlayState extends FlxState
 
 	var isDial:Bool = false;
 	var dialLine:Int = 0;
-	var dialText:FlxTypeText;
+	var dialText:FlxTypeText = new FlxTypeText(0, 0, 0, '', 0);
 
 	var map:FlxOgmo3Loader;
 	var walls:FlxTilemap;
@@ -70,6 +71,9 @@ class PlayState extends FlxState
 			doDial();
 
 		FlxG.camera.fade(FlxColor.BLACK, 0.5, true);
+
+		if (level == 2)
+			openSubState(new Fin());
 	}
 
 	override public function update(elapsed:Float)
@@ -249,6 +253,8 @@ class PlayState extends FlxState
 				newBox.loadGraphic('assets/images/box.png');
 				newBox.drag.x = 240;
 				newBox.drag.y = 240;
+				newBox.setSize(28, 28);
+				newBox.offset.set(2, 2);
 				boxes.add(newBox);
 			case 'powBlock':
 				var powBlock = new FlxSprite(entity.x, entity.y);
@@ -411,5 +417,13 @@ class Player extends FlxSprite
 		{
 			animation.play('${animtag}_idle');
 		}
+	}
+}
+
+class Fin extends FlxSubState
+{
+	public function new()
+	{
+		super();
 	}
 }
