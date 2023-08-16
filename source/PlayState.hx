@@ -8,6 +8,7 @@ import flixel.FlxSubState;
 import flixel.addons.editors.ogmo.FlxOgmo3Loader;
 import flixel.addons.text.FlxTypeText;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.text.FlxText;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxColor;
 import openfl.Assets;
@@ -424,6 +425,10 @@ class Fin extends FlxSubState
 {
 	public function new()
 	{
-		super();
+		super(FlxColor.fromRGB(0, 0, 0, 127));
+		var text:FlxText = new FlxText(0, 0, 600,
+			'THANKS FOR PLAYING\nThis thing was originally made for 1-BIT JAM over a week. The project is open-source, so if you want to do smth with it, go ahead!\n-NikRetaNCAM');
+		text.scrollFactor.set(0, 0);
+		add(text);
 	}
 }
